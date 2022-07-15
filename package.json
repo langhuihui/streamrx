@@ -1,0 +1,23 @@
+{
+  "name": "streamrx",
+  "version": "0.0.1",
+  "description": "rxjs implemented by Stream API",
+  "main": "index.js",
+  "scripts": {
+    "build": "tsc"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/langhuihui/streamrx.git"
+  },
+  "keywords": [
+    "rxjs",
+    "streamAPI"
+  ],
+  "author": "dexter",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/langhuihui/streamrx/issues"
+  },
+  "homepage": "https://github.com/langhuihui/streamrx#readme"
+}
