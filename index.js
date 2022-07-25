@@ -1,18 +1,13 @@
-"use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.ByteBuffer = exports.mergeMap = exports.concatMap = exports.switchMap = exports.zip = exports.combineLatest = exports.startWith = exports.throttleTime = exports.debounceTime = exports.merge = exports.concat = exports.skipWhile = exports.takeWhile = exports.skipUntil = exports.takeUntil = exports.skip = exports.take = exports.map = exports.filter = exports.throwError = exports.never = exports.empty = exports.of = exports.timer = exports.interval = exports.fromAnimationFrame = exports.fromPromise = exports.fromEvent = exports.lazy = exports.CANCEL = exports.noop = void 0;
-function noop() {
+export function noop() {
 }
-exports.noop = noop;
-exports.CANCEL = 'cancel';
-function lazy(begin) {
+export const CANCEL = 'cancel';
+export function lazy(begin) {
     return {
         pipeThrough: (tran, options) => lazy(async () => (await begin()).pipeThrough(typeof tran === 'function' ? await tran() : tran, options)),
         pipeTo: async (dest, options) => (await begin()).pipeTo(dest, options)
     };
 }
-exports.lazy = lazy;
-function fromEvent(target, eventName) {
+export function fromEvent(target, eventName) {
     let handler;
     return new ReadableStream({
         start(controller) {
@@ -40,8 +35,7 @@ function fromEvent(target, eventName) {
         }
     });
 }
-exports.fromEvent = fromEvent;
-function fromPromise(promise) {
+export function fromPromise(promise) {
     return new ReadableStream({
         async start(controller) {
             try {
@@ -54,8 +48,7 @@ function fromPromise(promise) {
         }
     });
 }
-exports.fromPromise = fromPromise;
-function fromAnimationFrame() {
+export function fromAnimationFrame() {
     let id;
     return new ReadableStream({
         start(controller) {
@@ -66,8 +59,7 @@ function fromAnimationFrame() {
         }
     });
 }
-exports.fromAnimationFrame = fromAnimationFrame;
-function interval(ms) {
+export function interval(ms) {
     let interval;
     return new ReadableStream({
         start(controller) {
@@ -79,8 +71,7 @@ function interval(ms) {
         }
     });
 }
-exports.interval = interval;
-function timer(delay, ms) {
+export function timer(delay, ms) {
     let timer;
     let interval;
     return new ReadableStream({
@@ -101,8 +92,7 @@ function timer(delay, ms) {
         }
     });
 }
-exports.timer = timer;
-function of(...item) {
+export function of(...item) {
     return new ReadableStream({
         start(controller) {
             item.forEach(item => controller.enqueue(item));
@@ -110,28 +100,24 @@ function of(...item) {
         }
     });
 }
-exports.of = of;
-function empty() {
+export function empty() {
     return new ReadableStream({
         start(controller) {
             controller.close();
         }
     });
 }
-exports.empty = empty;
-function never() {
+export function never() {
     return new ReadableStream();
 }
-exports.never = never;
-function throwError(error) {
+export function throwError(error) {
     return new ReadableStream({
         start(controller) {
             controller.error(error);
         }
     });
 }
-exports.throwError = throwError;
-function filter(f) {
+export function filter(f) {
     return new TransformStream({
         transform(chunk, controller) {
             if (f(chunk))
@@ -139,16 +125,14 @@ function filter(f) {
         },
     });
 }
-exports.filter = filter;
-function map(f) {
+export function map(f) {
     return new TransformStream({
         transform(chunk, controller) {
             controller.enqueue(f(chunk));
         },
     });
 }
-exports.map = map;
-function take(count) {
+export function take(count) {
     if (count <= 0)
         throw new Error("count must be greater than 0");
     return new TransformStream({
@@ -159,8 +143,7 @@ function take(count) {
         }
     });
 }
-exports.take = take;
-function skip(count) {
+export function skip(count) {
     if (count <= 0)
         throw new Error("count must be greater than 0");
     return new TransformStream({
@@ -171,14 +154,13 @@ function skip(count) {
         }
     });
 }
-exports.skip = skip;
-function takeUntil(control) {
+export function takeUntil(control) {
     return new TransformStream({
         start(controller) {
             const abortCtrl = new AbortController();
             control.pipeTo(new WritableStream({
                 write(chunk) {
-                    abortCtrl.abort();
+                    abortCtrl.abort('takeUntil');
                     controller.terminate();
                 }
             }), abortCtrl).catch(noop);
@@ -188,14 +170,13 @@ function takeUntil(control) {
         }
     });
 }
-exports.takeUntil = takeUntil;
-function skipUntil(control) {
+export function skipUntil(control) {
     const abortCtrl = new AbortController();
     return new TransformStream({
         start(controller) {
             control.pipeTo(new WritableStream({
                 write(chunk) {
-                    abortCtrl.abort();
+                    abortCtrl.abort('skipUntil');
                 }
             }), abortCtrl).catch(noop);
         },
@@ -206,8 +187,7 @@ function skipUntil(control) {
         }
     });
 }
-exports.skipUntil = skipUntil;
-function takeWhile(f) {
+export function takeWhile(f) {
     return new TransformStream({
         transform(chunk, controller) {
             if (f(chunk))
@@ -217,8 +197,7 @@ function takeWhile(f) {
         }
     });
 }
-exports.takeWhile = takeWhile;
-function skipWhile(f) {
+export function skipWhile(f) {
     let skip = true;
     return new TransformStream({
         transform(chunk, controller) {
@@ -230,7 +209,6 @@ function skipWhile(f) {
         }
     });
 }
-exports.skipWhile = skipWhile;
 function createWS(controller) {
     return new WritableStream({
         write(chunk) {
@@ -238,7 +216,7 @@ function createWS(controller) {
         }
     });
 }
-function concat(...streams) {
+export function concat(...streams) {
     let index = 0;
     const abortCtrl = new AbortController();
     let { readable, writable } = new TransformStream({
@@ -264,8 +242,7 @@ function concat(...streams) {
         }
     });
 }
-exports.concat = concat;
-function merge(...streams) {
+export function merge(...streams) {
     const abortCtrl = new AbortController();
     return new ReadableStream({
         start(controller) {
@@ -276,8 +253,7 @@ function merge(...streams) {
         }
     });
 }
-exports.merge = merge;
-function debounceTime(ms) {
+export function debounceTime(ms) {
     let timer;
     return new TransformStream({
         transform(chunk, controller) {
@@ -286,12 +262,11 @@ function debounceTime(ms) {
         }
     });
 }
-exports.debounceTime = debounceTime;
 const defaultThrottleConfig = {
     leading: true,
     trailing: false,
 };
-function throttleTime(ms, config = defaultThrottleConfig) {
+export function throttleTime(ms, config = defaultThrottleConfig) {
     let muted;
     let last;
     let hasValue = false;
@@ -328,16 +303,14 @@ function throttleTime(ms, config = defaultThrottleConfig) {
         },
     });
 }
-exports.throttleTime = throttleTime;
-function startWith(item) {
+export function startWith(item) {
     return new TransformStream({
         start(controller) {
             controller.enqueue(item);
         },
     });
 }
-exports.startWith = startWith;
-function combineLatest(...streams) {
+export function combineLatest(...streams) {
     const nTotal = streams.length;
     let nRun = nTotal; //剩余未发出事件的事件流数量
     const abortCtrl = new AbortController();
@@ -354,14 +327,13 @@ function combineLatest(...streams) {
                         controller.enqueue(array);
                 }
             }), abortCtrl))).then(() => controller.close(), e => abortCtrl.signal.aborted || controller.error(e));
+        },
+        cancel(reason) {
+            abortCtrl.abort(reason);
         }
     });
 }
-exports.combineLatest = combineLatest;
-function zip(...streams) {
-}
-exports.zip = zip;
-function switchMap(f) {
+export function switchMap(f) {
     let abortController;
     let waitSubPipe;
     return new TransformStream({
@@ -375,7 +347,7 @@ function switchMap(f) {
                         controller.enqueue(chunk);
                     }
                     catch (err) {
-                        abortController.abort(exports.CANCEL);
+                        abortController.abort(CANCEL);
                     }
                 }
             }), abortController).catch(noop);
@@ -387,8 +359,7 @@ function switchMap(f) {
         }
     });
 }
-exports.switchMap = switchMap;
-function concatMap(f) {
+export function concatMap(f) {
     const abortController = new AbortController();
     return new TransformStream({
         async transform(chunk, controller) {
@@ -398,15 +369,14 @@ function concatMap(f) {
                         controller.enqueue(chunk);
                     }
                     catch (err) {
-                        abortController.abort(exports.CANCEL);
+                        abortController.abort(CANCEL);
                     }
                 }
             }), abortController).catch(noop);
         },
     });
 }
-exports.concatMap = concatMap;
-function mergeMap(f) {
+export function mergeMap(f) {
     return new TransformStream({
         transform(chunk, controller) {
             const abortController = new AbortController();
@@ -416,20 +386,26 @@ function mergeMap(f) {
                         controller.enqueue(chunk);
                     }
                     catch (err) {
-                        abortController.abort(exports.CANCEL);
+                        abortController.abort(CANCEL);
                     }
                 }
             }), abortController).catch(noop);
         },
     });
 }
-exports.mergeMap = mergeMap;
-function ByteBuffer() {
-    return new TransformStream({
-        transform(chunk, controller) {
+export function tap(f) {
+    return map(item => (f(item), item));
+}
+export function range(start, count = Number.POSITIVE_INFINITY) {
+    let i = 0;
+    return new ReadableStream({
+        pull(controller) {
+            if (i < count) {
+                controller.enqueue(start + i++);
+            }
+            else {
+                controller.close();
+            }
         }
-    }, {
-        highWaterMark: 0
     });
 }
-exports.ByteBuffer = ByteBuffer;

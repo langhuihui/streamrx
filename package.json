@@ -1,6 +1,6 @@
 {
   "name": "streamrx",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "Implementing RxJs with Streams API",
   "main": "index.js",
   "scripts": {

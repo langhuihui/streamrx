@@ -1,5 +1,3 @@
-import { WriteStream } from "fs";
-
 export type EventHandler<T> = (event: T) => void;
 export function noop() {
 
@@ -166,7 +164,7 @@ export function takeUntil<T>(control: ReadableStream) {
       const abortCtrl = new AbortController();
       control.pipeTo(new WritableStream({
         write(chunk) {
-          abortCtrl.abort();
+          abortCtrl.abort('takeUntil');
           controller.terminate();
         }
       }), abortCtrl).catch(noop);
@@ -182,7 +180,7 @@ export function skipUntil<T>(control: ReadableStream) {
     start(controller) {
       control.pipeTo(new WritableStream({
         write(chunk) {
-          abortCtrl.abort();
+          abortCtrl.abort('skipUntil');
         }
       }), abortCtrl).catch(noop);
     },
@@ -331,11 +329,11 @@ export function combineLatest<A extends unknown[]>(...streams: ReadableStreamTup
           if (nRun == 0) controller.enqueue(array);
         }
       }), abortCtrl))).then(() => controller.close(), e => abortCtrl.signal.aborted || controller.error(e));
+    },
+    cancel(reason: any) {
+      abortCtrl.abort(reason);
     }
   });
-}
-export function zip<T>(...streams: ReadableStream<T>[]) {
-
 }
 export function switchMap<I, O>(f: (item: I) => ReadableStream<O>) {
   let abortController: AbortController;
@@ -392,12 +390,18 @@ export function mergeMap<I, O>(f: (item: I) => ReadableStream<O>) {
     },
   });
 }
-
-export function ByteBuffer() {
-  return new TransformStream<Uint8Array, Uint8Array>({
-    transform(chunk, controller) {
+export function tap(f: (item: any) => void) {
+  return map(item => (f(item), item));
+}
+export function range(start: number, count: number = Number.POSITIVE_INFINITY) {
+  let i = 0;
+  return new ReadableStream({
+    pull(controller) {
+      if (i < count) {
+        controller.enqueue(start + i++);
+      } else {
+        controller.close();
+      }
     }
-  }, {
-    highWaterMark: 0
   });
 }
