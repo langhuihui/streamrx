@@ -1,3 +1,5 @@
+import { WriteStream } from "fs";
+
 export type EventHandler<T> = (event: T) => void;
 export function noop() {
 
@@ -17,6 +19,12 @@ export type EventDispachter<N, T> = {
 export type ReadableStreamTuple<T> = {
   [K in keyof T]: ReadableStream<T[K]>;
 };
+export function lazy<I>(begin: () => ReadableStream<I> | Promise<ReadableStream<I>>) {
+  return {
+    pipeThrough: <O>(tran: TransformStream<I, O> | (() => TransformStream<I, O> | Promise<TransformStream<I, O>>), options?: StreamPipeOptions) => lazy(async () => (await begin()).pipeThrough(typeof tran === 'function' ? await tran() : tran, options)),
+    pipeTo: async (dest: WritableStream<I>, options?: StreamPipeOptions) => (await begin()).pipeTo(dest, options)
+  };
+}
 export function fromEvent<T, N>(target: EventDispachter<N, T>, eventName: N) {
   let handler: (event: T) => void;
   return new ReadableStream<T>({
@@ -214,6 +222,15 @@ function createWS<T>(controller: ReadableStreamDefaultController<T> | TransformS
 export function concat<T>(...streams: ReadableStream<T>[]) {
   let index = 0;
   const abortCtrl = new AbortController();
+  let { readable, writable } = new TransformStream({
+    start() {
+      streams.reduce(
+        (a, res, i, arr) => a.then(() => res.pipeTo(writable, { signal: abortCtrl.signal, preventClose: (i + 1) !== arr.length })),
+        Promise.resolve()
+      ).catch(noop);
+    }
+  });
+  return readable;
   return new ReadableStream<T>({
     start(controller) {
       const ws = createWS(controller);
@@ -373,5 +390,14 @@ export function mergeMap<I, O>(f: (item: I) => ReadableStream<O>) {
         }
       }), abortController).catch(noop);
     },
+  });
+}
+
+export function ByteBuffer() {
+  return new TransformStream<Uint8Array, Uint8Array>({
+    transform(chunk, controller) {
+    }
+  }, {
+    highWaterMark: 0
   });
 }

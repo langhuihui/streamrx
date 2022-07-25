@@ -1,38 +1,26 @@
 <script setup lang="ts">
-import { ref } from 'vue'
-
-defineProps<{ msg: string }>()
-
-const count = ref(0)
+import { ref } from 'vue';
+import { interval, takeWhile, map } from '../../..';
+const msg = ref("hello world\n");
+const createWS = <T>() => new WritableStream<T>({
+  write(chunk: T) {
+    msg.value += chunk + "\n";
+  }
+});
+interval(1000)
+  .pipeThrough(map(x => 10 - x))
+  .pipeThrough(takeWhile(x => x > 0))
+  .pipeTo(createWS()).then(() => {
+    msg.value="complete"
+  });
 </script>
 
 <template>
-  <h1>{{ msg }}</h1>
-
-  <div class="card">
-    <button type="button" @click="count++">count is {{ count }}</button>
-    <p>
-      Edit
-      <code>components/HelloWorld.vue</code> to test HMR
-    </p>
+  <div>
+    <pre>
+      <code>
+  {{ msg }}
+      </code>
+    </pre>
   </div>
-
-  <p>
-    Check out
-    <a href="https://vuejs.org/guide/quick-start.html#local" target="_blank"
-      >create-vue</a
-    >, the official Vue + Vite starter
-  </p>
-  <p>
-    Install
-    <a href="https://github.com/johnsoncodehk/volar" target="_blank">Volar</a>
-    in your IDE for a better DX
-  </p>
-  <p class="read-the-docs">Click on the Vite and Vue logos to learn more</p>
 </template>
-
-<style scoped>
-.read-the-docs {
-  color: #888;
-}
-</style>
