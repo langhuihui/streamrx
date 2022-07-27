@@ -4,6 +4,7 @@
 import { ref } from 'vue';
 import { fromEvent, startWith, interval, switchMap, takeUntil, timer, concat, take, lazy, range } from '../../index';
 import HelloWorld from './components/HelloWorld.vue';
+import SMS from './components/SMS.vue';
 // Check out https://vuejs.org/api/sfc-script-setup.html#script-setup
 const msg = ref("");
 const abortControl = new AbortController();
@@ -44,17 +45,19 @@ const output = new WritableStream({
 //     }
 //   }));
 // });
-range(1, 10).pipeTo(output);
 </script>
 
 <template>
-  <div>
-    <pre>
-      <code>
-  {{ msg }}
-      </code>
-    </pre>
-  </div>
+  <n-message-provider>
+    <n-tabs type="segment" default-value="sms">
+      <n-tab-pane name="HelloWorld" tab="倒计时">
+        <HelloWorld />
+      </n-tab-pane>
+      <n-tab-pane name="sms" tab="发送验证码">
+        <SMS />
+      </n-tab-pane>
+    </n-tabs>
+  </n-message-provider>
 </template>
 <style>
 code {
