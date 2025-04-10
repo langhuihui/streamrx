@@ -1,0 +1,17 @@
+{
+  "all": true,
+  "include": [
+    "src/**/*.ts"
+  ],
+  "exclude": [
+    "**/*.spec.ts",
+    "**/*.test.ts",
+    "**/*.d.ts",
+    "coverage/**"
+  ],
+  "reporter": [
+    "html",
+    "text"
+  ],
+  "check-coverage": true
+} 
